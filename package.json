@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "antd": "^5.24.3",
+    "drizzle-kit": "^0.30.5",
     "drizzle-orm": "^0.40.0",
     "next": "15.2.1",
     "pg": "^8.13.3",
@@ -21,6 +22,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^16.4.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

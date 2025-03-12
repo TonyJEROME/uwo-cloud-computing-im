@@ -1,6 +1,9 @@
-import { Pool } from "pg";
+// import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
 import * as schema from "./schema"
+import pg from "pg"
+const { Pool } = pg;
+
 
 const pool = new Pool({
     host: process.env.DATABASE_URL!,

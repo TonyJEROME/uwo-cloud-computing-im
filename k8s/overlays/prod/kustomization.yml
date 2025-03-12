@@ -1,0 +1,16 @@
+bases:
+  - ../../base
+
+images:
+  - name: LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG
+    newName: webapp-prod-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE
+    newTag: "$GITHUB_SHA"
+
+patches:
+  - target:
+      kind: Deployment
+      name: webapp
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 2

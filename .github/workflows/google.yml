@@ -37,7 +37,8 @@ on:
   push:
     branches:
       # - '"master"'
-      - '"deploy"'
+      - deploy
+  workflow_dispatch:
 
 env:
   PROJECT_ID: 'ece9016-452720'

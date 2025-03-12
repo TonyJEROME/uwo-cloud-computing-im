@@ -44,7 +44,6 @@ env:
   PROJECT_ID: 'ece9016-452720'
   GAR_LOCATION: 'us-central1'
   GKE_ZONE: 'us-central1-c'
-  DEPLOYMENT_NAME: 'webserver-deploy'
   REPOSITORY: 'webapp-img'
   WORKLOAD_IDENTITY_PROVIDER: 'projects/713996055045/locations/global/workloadIdentityPools/github-action/providers/github-repo'
 
@@ -64,7 +63,7 @@ jobs:
 
       - name: Set ENV
         run: |
-          if [[ $GITHUB_REF == 'refs/heads/main' ]]; then
+          if [[ $GITHUB_REF == 'refs/heads/master' ]]; then
             echo "IMAGE=webapp-prod" >> $GITHUB_ENV
             echo "GKE_CLUSTER=webapp" >> $GITHUB_ENV
             echo "DEPLOYMENT_NAME=webapp" >> $GITHUB_ENV
@@ -130,7 +129,7 @@ jobs:
         working-directory: ./k8s/overlays/prod
 
       - name: Deploy to Prod Cluster
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/master'
         run: |-
           # replacing the image name in the k8s template
           ${{ github.workspace }}/kustomize edit set image LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA

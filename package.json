@@ -27,6 +27,7 @@
     "@types/react-dom": "^19",
     "dotenv": "^16.4.5",
     "tailwindcss": "^4",
+    "tsx": "^4.19.3",
     "typescript": "^5"
   }
 }

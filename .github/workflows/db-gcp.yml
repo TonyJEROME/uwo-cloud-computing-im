@@ -69,12 +69,12 @@ jobs:
         run: |
           echo "DEPLOYMENT_NAME=db" >> $GITHUB_ENV
           echo "DEPLOY_ENV=${{ github.event.inputs.env }}" >> $GITHUB_ENV
-          if [[ $GITHUB_REF == 'refs/heads/master' ]]; then
+          if [[ "${{ github.event.inputs.env }}" == 'prod' ]]; then
             echo "GKE_CLUSTER=webapp" >> $GITHUB_ENV
-            echo "SECRET_KEY=713996055045/dev_database_password" >> $GITHUB_ENV
-          elif [[ $GITHUB_REF == 'refs/heads/deploy' ]]; then
-            echo "GKE_CLUSTER=webapp-dev" >> $GITHUB_ENV
             echo "SECRET_KEY=713996055045/prod_database_password" >> $GITHUB_ENV
+          elif [[ "${{ github.event.inputs.env }}" == 'dev' ]]; then
+            echo "GKE_CLUSTER=webapp-dev" >> $GITHUB_ENV
+            echo "SECRET_KEY=713996055045/dev_database_password" >> $GITHUB_ENV
           fi
       # Configure Workload Identity Federation and generate an access token.
       #

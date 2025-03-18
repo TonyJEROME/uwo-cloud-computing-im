@@ -37,7 +37,7 @@ on:
   push:
     branches:
       - master
-      - deploy
+      - dev
   workflow_dispatch:
 
 env:
@@ -67,7 +67,7 @@ jobs:
           if [[ $GITHUB_REF == 'refs/heads/master' ]]; then
             echo "IMAGE=webapp-prod" >> $GITHUB_ENV
             echo "GKE_CLUSTER=webapp" >> $GITHUB_ENV
-          elif [[ $GITHUB_REF == 'refs/heads/deploy' ]]; then
+          elif [[ $GITHUB_REF == 'refs/heads/dev' ]]; then
             echo "IMAGE=webapp-dev" >> $GITHUB_ENV
             echo "GKE_CLUSTER=webapp-dev" >> $GITHUB_ENV
           fi
@@ -118,7 +118,7 @@ jobs:
 
       # Deploy the Docker image to the GKE cluster
       - name: Test Deploy
-        if: github.ref == 'refs/heads/deploy'
+        if: github.ref == 'refs/heads/dev'
         run: |-
           # replacing the image name in the k8s template
           ${{ github.workspace }}/kustomize edit set image LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA

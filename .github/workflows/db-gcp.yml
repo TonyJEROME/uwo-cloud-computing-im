@@ -98,7 +98,7 @@ jobs:
         uses: 'google-github-actions/get-secretmanager-secrets@v2'
         with:
           secrets: |-
-            DB_PASSWORD:${{ env.PROJECT_ID }}
+            DB_PASSWORD:${{ env.SECRET_KEY }}
 
       # Set up kustomize
       - name: 'Set up Kustomize'

@@ -1,0 +1,19 @@
+bases:
+  - ../../base
+
+patches:
+  - target:
+      kind: Deployment
+      name: webapp
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: 1
+
+  - target:
+      kind: Service
+      name: webapp
+    patch: |-
+      - op: replace
+        path: /spec/type
+        value: LoadBalancer

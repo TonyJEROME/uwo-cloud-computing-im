@@ -11,6 +11,13 @@ spec:
       labels:
         app: webapp
     spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: webapp
+              topologyKey: kubernetes.io/hostname
       containers:
         - name: webapp
           image: LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG

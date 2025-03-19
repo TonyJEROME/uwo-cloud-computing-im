@@ -39,6 +39,14 @@ on:
       - master
       - dev
   workflow_dispatch:
+    env:
+      description: 'Choose deployment environment'
+      required: true
+      default: 'dev'
+      type: choice
+      options:
+        - dev
+        - prod
 
 env:
   PROJECT_ID: 'ece9016-452720'
@@ -63,11 +71,23 @@ jobs:
 
       - name: Set ENV
         run: |
+          if [[ "${{ github.event.inputs.env }}" == 'prod' ]]; then
+            echo "DEPLOY_ENV=prod" >> $GITHUB_ENV
+          elif [[ "${{ github.event.inputs.env }}" == 'dev' ]]; then
+            echo "DEPLOY_ENV=dev" >> $GITHUB_ENV
+          elif [[ $GITHUB_REF == 'refs/heads/master' ]]; then
+            echo "DEPLOY_ENV=prod" >> $GITHUB_ENV
+          elif [[ $GITHUB_REF == 'refs/heads/dev' ]]; then
+            echo "DEPLOY_ENV=dev" >> $GITHUB_ENV
+          fi
+        
+      - name: Set GITHUB ENV
+        run: |
           echo "DEPLOYMENT_NAME=webapp" >> $GITHUB_ENV
-          if [[ $GITHUB_REF == 'refs/heads/master' ]]; then
+          if [[ "${{ env.DEPLOY_ENV }}" == 'prod' ]]; then
             echo "IMAGE=webapp-prod" >> $GITHUB_ENV
             echo "GKE_CLUSTER=webapp" >> $GITHUB_ENV
-          elif [[ $GITHUB_REF == 'refs/heads/dev' ]]; then
+          elif [[ "${{ env.DEPLOY_ENV }}" == 'dev' ]]; then
             echo "IMAGE=webapp-dev" >> $GITHUB_ENV
             echo "GKE_CLUSTER=webapp-dev" >> $GITHUB_ENV
           fi
@@ -118,7 +138,7 @@ jobs:
 
       # Deploy the Docker image to the GKE cluster
       - name: Test Deploy
-        if: github.ref == 'refs/heads/dev'
+        if: ${{ env.DEPLOY_ENV == 'dev' }}
         run: |-
           # replacing the image name in the k8s template
           ${{ github.workspace }}/kustomize edit set image LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA
@@ -128,7 +148,7 @@ jobs:
         working-directory: ./k8s/overlays/dev/webserver
 
       - name: Deploy to Prod Cluster
-        if: github.ref == 'refs/heads/master'
+        if: ${{ env.DEPLOY_ENV == 'prod' }}
         run: |-
           # replacing the image name in the k8s template
           ${{ github.workspace }}/kustomize edit set image LOCATION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE:TAG=$GAR_LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$GITHUB_SHA

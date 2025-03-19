@@ -39,14 +39,15 @@ on:
       - master
       - dev
   workflow_dispatch:
-    env:
-      description: 'Choose deployment environment'
-      required: true
-      default: 'dev'
-      type: choice
-      options:
-        - dev
-        - prod
+    inputs:
+      env:
+        description: 'Choose deployment environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - prod
 
 env:
   PROJECT_ID: 'ece9016-452720'

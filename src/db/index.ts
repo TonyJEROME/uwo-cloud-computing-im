@@ -1,16 +1,21 @@
-// import { Pool } from "pg";
 import { drizzle } from "drizzle-orm/node-postgres";
-import * as schema from "./schema"
-import pg from "pg"
-const { Pool } = pg;
+import * as schema from "./schema";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { pool } from "./pool"; // 导入共享的连接池
 
+// 添加详细日志
+console.log("初始化 Drizzle ORM");
 
-const pool = new Pool({
-    host: process.env.DATABASE_URL!,
-    port: 5432,
-    user: process.env.DATABASE_USER!,
-    password: process.env.DATABASE_PASSWORD!,
-    database: process.env.DATABASE_NAME!,
-})
+// 创建 Drizzle 实例并添加明确的类型
+let db: NodePgDatabase<typeof schema>;
+try {
+  db = drizzle(pool, { schema });
+  console.log("Drizzle ORM 初始化成功");
+} catch (error) {
+  console.error("Drizzle ORM 初始化失败:", error);
+  throw error;
+}
 
-export const db = drizzle(pool,{schema});
+console.log("导出数据库连接实例，内存地址:", db);
+
+export { db };

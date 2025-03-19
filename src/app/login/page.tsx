@@ -30,7 +30,7 @@ export default function Login() {
 
             router.push("/post");
         } catch (err) {
-            setError("登录失败，请检查邮箱和密码");
+            setError("Login failed, please check your email and password");
         }
     };
 
@@ -47,7 +47,7 @@ export default function Login() {
                         priority
                     />
                     <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
-                        登录账户
+                        Log in to your account
                     </h2>
                 </div>
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -59,7 +59,7 @@ export default function Login() {
                     <div className="rounded-md shadow-sm space-y-4">
                         <div>
                             <label htmlFor="email" className="sr-only">
-                                邮箱地址
+                                Email address
                             </label>
                             <input
                                 id="email"
@@ -67,7 +67,7 @@ export default function Login() {
                                 type="email"
                                 required
                                 className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="邮箱地址"
+                                placeholder="Email address"
                                 value={formData.email}
                                 onChange={(e) =>
                                     setFormData({ ...formData, email: e.target.value })
@@ -76,7 +76,7 @@ export default function Login() {
                         </div>
                         <div>
                             <label htmlFor="password" className="sr-only">
-                                密码
+                                Password
                             </label>
                             <input
                                 id="password"
@@ -84,7 +84,7 @@ export default function Login() {
                                 type="password"
                                 required
                                 className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="密码"
+                                placeholder="Password"
                                 value={formData.password}
                                 onChange={(e) =>
                                     setFormData({ ...formData, password: e.target.value })
@@ -102,13 +102,13 @@ export default function Login() {
                                 className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                             />
                             <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                                记住我
+                                Remember me
                             </label>
                         </div>
 
                         <div className="text-sm">
                             <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
-                                忘记密码?
+                                Forgot password?
                             </a>
                         </div>
                     </div>
@@ -118,16 +118,16 @@ export default function Login() {
                             type="submit"
                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                            登录
+                            Log in
                         </button>
                     </div>
                 </form>
 
                 <div className="text-center">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                        还没有账户?{" "}
+                        Don't have an account?{" "}
                         <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
-                            立即注册
+                            Sign up now
                         </Link>
                     </p>
                 </div>

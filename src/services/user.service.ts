@@ -21,7 +21,7 @@ export class UserService {
             const hashedPassword = await hash(password, 10);
             const userId = Math.floor(Math.random() * 1000000);
             
-            console.log("开始注册用户:", {userId, email, firstName, lastName});
+            console.log("Starting user registration:", {userId, email, firstName, lastName});
             
             // 尝试使用事务和直接 SQL 插入
             const client = await pool.connect();
@@ -39,40 +39,40 @@ export class UserService {
                     userId, email, hashedPassword, firstName, lastName, true, false
                 ]);
                 
-                console.log("SQL 直接插入结果:", result.rows[0]);
+                console.log("SQL direct insert result:", result.rows[0]);
                 
                 await client.query('COMMIT');
                 return result.rows[0];
             } catch (err) {
                 await client.query('ROLLBACK');
-                console.error("SQL 执行错误:", err);
+                console.error("SQL execution error:", err);
                 throw err;
             } finally {
                 client.release();
             }
         } catch (error) {
-            console.error("用户注册错误:", error);
+            console.error("User registration error:", error);
             throw error;
         }
     }
 
     static async verifyPassword(userId: number, password: string) {
         try {
-            console.log("正在验证用户密码，userId:", userId);
+            console.log("Verifying user password, userId:", userId);
             
             // 尝试查找用户
             const user = await db.query.users.findFirst({
                 where: eq(users.userId, userId),
             });
             
-            console.log("查询结果:", user ? "找到用户" : "未找到用户");
+            console.log("Query result:", user ? "User found" : "User not found");
             
             if (!user) {
                 // 尝试使用直接 SQL 查询
                 const client = await pool.connect();
                 try {
                     const result = await client.query('SELECT * FROM users WHERE user_id = $1', [userId]);
-                    console.log("SQL 直接查询结果:", result.rows[0] ? "找到用户" : "未找到用户");
+                    console.log("SQL direct query result:", result.rows[0] ? "User found" : "User not found");
                     
                     if (result.rows.length === 0) {
                         throw new Error("User not found");
@@ -97,7 +97,7 @@ export class UserService {
             
             return true;
         } catch (error) {
-            console.error("验证密码时出错:", error);
+            console.error("Error verifying password:", error);
             throw error;
         }
     }

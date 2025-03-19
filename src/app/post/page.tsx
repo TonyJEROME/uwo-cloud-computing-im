@@ -21,7 +21,7 @@ type Post = {
   userId: number;
   content: string;
   likeCount: number | null;
-  user?: User;  // 添加用户信息
+  user?: User;  // Add user information
 };
 
 export default function PostPage() {
@@ -31,7 +31,7 @@ export default function PostPage() {
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // 使用 API 获取帖子而不是直接访问数据库
+    // Use API to get posts instead of directly accessing the database
     const fetchPosts = async () => {
         try {
             const response = await fetch('/api/posts');
@@ -44,7 +44,7 @@ export default function PostPage() {
         }
     };
 
-    // 在 useEffect 中检查登录状态
+    // Check login status in useEffect
     useEffect(() => {
         const checkLoginStatus = async () => {
             try {
@@ -60,12 +60,12 @@ export default function PostPage() {
         fetchPosts();
     }, []);
 
-    // 在表单提交前检查登录状态
+    // Check login status before form submission
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
         if (!isLoggedIn) {
-            alert("请先登录后再发布帖子");
+            alert("Please log in before posting");
             router.push('/login');
             return;
         }
@@ -85,16 +85,16 @@ export default function PostPage() {
             }
 
             setNewPost("");
-            fetchPosts(); // 重新获取帖子
+            fetchPosts(); // Refresh posts
         } catch (error) {
             console.error("Error creating post:", error);
-            alert(error instanceof Error ? error.message : "发布帖子失败");
+            alert(error instanceof Error ? error.message : "Failed to publish post");
         }
     };
     
-    // 添加删除帖子功能
+    // Add post deletion function
     const handleDeletePost = async (postId: string) => {
-        if (confirm("确定要删除这条帖子吗？")) {
+        if (confirm("Are you sure you want to delete this post?")) {
             setIsDeleting(postId);
             try {
                 const response = await fetch(`/api/posts/${postId}`, {
@@ -105,11 +105,11 @@ export default function PostPage() {
                     throw new Error("Failed to delete post");
                 }
                 
-                // 删除成功后刷新帖子列表
+                // Refresh post list after successful deletion
                 fetchPosts();
             } catch (error) {
                 console.error("Error deleting post:", error);
-                alert("删除帖子失败");
+                alert("Failed to delete post");
             } finally {
                 setIsDeleting(null);
             }
@@ -120,19 +120,19 @@ export default function PostPage() {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
             <div className="max-w-4xl mx-auto px-4">
                 <div className="flex items-center justify-between mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">帖子列表</h1>
+                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Posts</h1>
                     <div className="flex space-x-4">
                         <Link
                             href="/user-center"
                             className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                         >
-                            个人中心
+                            Profile
                         </Link>
                         <a
                             href="/post/new"
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                         >
-                            发布新帖子
+                            New Post
                         </a>
                     </div>
                 </div>
@@ -142,14 +142,14 @@ export default function PostPage() {
                         value={newPost}
                         onChange={(e) => setNewPost(e.target.value)}
                         className="w-full p-4 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                        placeholder="分享你的想法..."
+                        placeholder="Share your thoughts..."
                         rows={4}
                     />
                     <button
                         type="submit"
                         className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                        发布
+                        Post
                     </button>
                 </form>
 
@@ -163,7 +163,7 @@ export default function PostPage() {
                                 <div className="flex items-center space-x-3">
                                     <div className="flex flex-col">
                                         <div className="font-medium text-gray-900 dark:text-white">
-                                            {post.user ? `${post.user.firstName} ${post.user.lastName}` : "未知用户"}
+                                            {post.user ? `${post.user.firstName} ${post.user.lastName}` : "Unknown User"}
                                         </div>
                                         <div className="text-sm text-gray-500 dark:text-gray-400">
                                             {new Date(post.createdAt!).toLocaleDateString()}
@@ -175,7 +175,7 @@ export default function PostPage() {
                                     disabled={isDeleting === post.postId}
                                     className="text-red-500 hover:text-red-700 disabled:opacity-50"
                                 >
-                                    {isDeleting === post.postId ? "删除中..." : "删除"}
+                                    {isDeleting === post.postId ? "Deleting..." : "Delete"}
                                 </button>
                             </div>
                             <div className="text-gray-900 dark:text-white">

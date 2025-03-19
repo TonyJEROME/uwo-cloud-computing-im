@@ -26,9 +26,9 @@ export default function Register() {
         e.preventDefault();
         setError("");
         
-        // 验证密码匹配
+        // Validate password match
         if (formData.password !== formData.confirmPassword) {
-            setError("密码不匹配");
+            setError("Passwords do not match");
             return;
         }
         
@@ -50,13 +50,13 @@ export default function Register() {
             const data = await response.json();
             
             if (!response.ok) {
-                throw new Error(data.error || "注册失败");
+                throw new Error(data.error || "Registration failed");
             }
             
-            // 注册成功，跳转到登录页
+            // Registration successful, redirect to login page
             router.push("/login?registered=true");
         } catch (err: any) {
-            setError(err.message || "注册过程中出现错误");
+            setError(err.message || "An error occurred during registration");
         } finally {
             setLoading(false);
         }
@@ -75,7 +75,7 @@ export default function Register() {
                         priority
                     />
                     <h2 className="mt-6 text-3xl font-bold text-gray-900 dark:text-white">
-                        创建新账户
+                        Create new account
                     </h2>
                 </div>
                 
@@ -89,7 +89,7 @@ export default function Register() {
                     <div className="rounded-md shadow-sm space-y-4">
                         <div>
                             <label htmlFor="email" className="sr-only">
-                                邮箱地址
+                                Email address
                             </label>
                             <input
                                 id="email"
@@ -97,14 +97,14 @@ export default function Register() {
                                 type="email"
                                 required
                                 className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="邮箱地址"
+                                placeholder="Email address"
                                 value={formData.email}
                                 onChange={handleChange}
                             />
                         </div>
                         <div>
                             <label htmlFor="firstName" className="sr-only">
-                                名字
+                                First name
                             </label>
                             <input
                                 id="firstName"
@@ -112,14 +112,14 @@ export default function Register() {
                                 type="text"
                                 required
                                 className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="名字"
+                                placeholder="First name"
                                 value={formData.firstName}
                                 onChange={handleChange}
                             />
                         </div>
                         <div>
                             <label htmlFor="lastName" className="sr-only">
-                                姓氏
+                                Last name
                             </label>
                             <input
                                 id="lastName"
@@ -127,14 +127,14 @@ export default function Register() {
                                 type="text"
                                 required
                                 className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="姓氏"
+                                placeholder="Last name"
                                 value={formData.lastName}
                                 onChange={handleChange}
                             />
                         </div>
                         <div>
                             <label htmlFor="password" className="sr-only">
-                                密码
+                                Password
                             </label>
                             <input
                                 id="password"
@@ -142,14 +142,14 @@ export default function Register() {
                                 type="password"
                                 required
                                 className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="密码"
+                                placeholder="Password"
                                 value={formData.password}
                                 onChange={handleChange}
                             />
                         </div>
                         <div>
                             <label htmlFor="confirmPassword" className="sr-only">
-                                确认密码
+                                Confirm password
                             </label>
                             <input
                                 id="confirmPassword"
@@ -157,7 +157,7 @@ export default function Register() {
                                 type="password"
                                 required
                                 className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                placeholder="确认密码"
+                                placeholder="Confirm password"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
                             />
@@ -170,16 +170,16 @@ export default function Register() {
                             disabled={loading}
                             className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
                         >
-                            {loading ? "注册中..." : "注册"}
+                            {loading ? "Registering..." : "Register"}
                         </button>
                     </div>
                 </form>
 
                 <div className="text-center">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                        已有账户?{" "}
+                        Already have an account?{" "}
                         <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                            立即登录
+                            Log in now
                         </Link>
                     </p>
                 </div>

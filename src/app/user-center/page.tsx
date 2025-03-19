@@ -27,9 +27,9 @@ export default function UserCenter() {
         setError("");
         setSuccess("");
 
-        // 验证新密码匹配
+        // Validate new password match
         if (passwordData.newPassword !== passwordData.confirmPassword) {
-            setError("新密码不匹配");
+            setError("New passwords don't match");
             return;
         }
 
@@ -47,10 +47,10 @@ export default function UserCenter() {
 
             if (!response.ok) {
                 const data = await response.json();
-                throw new Error(data.error || "修改密码失败");
+                throw new Error(data.error || "Failed to change password");
             }
 
-            setSuccess("密码修改成功");
+            setSuccess("Password changed successfully");
             setPasswordData({
                 currentPassword: "",
                 newPassword: "",
@@ -58,7 +58,7 @@ export default function UserCenter() {
             });
             setIsChangingPassword(false);
         } catch (err: any) {
-            setError(err.message || "修改密码过程中出现错误");
+            setError(err.message || "An error occurred while changing password");
         }
     };
 
@@ -71,7 +71,7 @@ export default function UserCenter() {
                             <span className="text-4xl text-gray-400">👤</span>
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">用户中心</h1>
+                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Profile</h1>
                             <p className="text-gray-500 dark:text-gray-400">example@email.com</p>
                         </div>
                     </div>
@@ -90,46 +90,46 @@ export default function UserCenter() {
 
                     <div className="space-y-6">
                         <div className="border-b dark:border-gray-700 pb-6">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">个人信息</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Personal Information</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        姓名
+                                        Name
                                     </label>
                                     <input
                                         type="text"
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        placeholder="您的姓名"
+                                        placeholder="Your name"
                                     />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        电话
+                                        Phone
                                     </label>
                                     <input
                                         type="tel"
                                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        placeholder="联系电话"
+                                        placeholder="Contact phone"
                                     />
                                 </div>
                             </div>
                         </div>
 
                         <div className="border-b dark:border-gray-700 pb-6">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">账户安全</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Account Security</h2>
                             
                             {!isChangingPassword ? (
                                 <button 
                                     onClick={() => setIsChangingPassword(true)}
                                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                                 >
-                                    修改密码
+                                    Change Password
                                 </button>
                             ) : (
                                 <form onSubmit={handleSubmitPasswordChange} className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            当前密码
+                                            Current Password
                                         </label>
                                         <input
                                             type="password"
@@ -142,7 +142,7 @@ export default function UserCenter() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            新密码
+                                            New Password
                                         </label>
                                         <input
                                             type="password"
@@ -155,7 +155,7 @@ export default function UserCenter() {
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            确认新密码
+                                            Confirm New Password
                                         </label>
                                         <input
                                             type="password"
@@ -171,14 +171,14 @@ export default function UserCenter() {
                                             type="submit"
                                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                                         >
-                                            保存
+                                            Save
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setIsChangingPassword(false)}
                                             className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
                                         >
-                                            取消
+                                            Cancel
                                         </button>
                                     </div>
                                 </form>
@@ -186,12 +186,12 @@ export default function UserCenter() {
                         </div>
 
                         <div>
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">我的帖子</h2>
+                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">My Posts</h2>
                             <a
                                 href="/post"
                                 className="inline-block bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white px-4 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                             >
-                                查看全部帖子
+                                View all posts
                             </a>
                         </div>
                     </div>

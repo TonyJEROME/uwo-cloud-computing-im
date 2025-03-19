@@ -31,7 +31,7 @@ export class SessionService {
     }
     
     static async validateSession(token: string) {
-        console.log("验证会话令牌:", token);
+        console.log("Validating session token:", token);
         
         const session = await db.query.sessions.findFirst({
             where: eq(sessions.token, token),
@@ -40,7 +40,7 @@ export class SessionService {
             },
         });
         
-        console.log("会话验证结果:", session ? `找到会话，用户ID: ${session.user.userId}` : "未找到会话");
+        console.log("Session validation result:", session ? `Session found, user ID: ${session.user.userId}` : "Session not found");
         
         if (!session) {
             return null;

@@ -17,6 +17,9 @@ spec:
           image: postgres:13
           env:
             - name: POSTGRES_PASSWORD
-              value: $(DB_PASSWORD)
+              valueFrom:
+                configMapKeyRef:
+                  name: db-config
+                  key: DB_PASSWORD
           ports:
             - containerPort: 5432

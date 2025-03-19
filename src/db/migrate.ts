@@ -1,43 +1,33 @@
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { migrate } from 'drizzle-orm/node-postgres/migrator';
-import { Pool } from 'pg';
-import * as dotenv from 'dotenv';
+#!/usr/bin/env node
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
+import * as dotenv from "dotenv";
+import * as path from "path";
 
-// Load environment variables at the start of the file
-dotenv.config();
-
-// Verify environment variables are loaded
-const requiredEnvVars = ['DATABASE_HOST', 'DATABASE_USER', 'DATABASE_PASSWORD', 'DATABASE_NAME'];
-for (const envVar of requiredEnvVars) {
-  if (!process.env[envVar]) {
-    throw new Error(`Missing required environment variable: ${envVar}`);
-  }
-}
-
-const pool = new Pool({
-  host: process.env.DATABASE_HOST,
-  port: parseInt(process.env.DATABASE_PORT || '5432'),
-  user: process.env.DATABASE_USER,
-  password: process.env.DATABASE_PASSWORD,
-  database: process.env.DATABASE_NAME,
-});
-
-const db = drizzle(pool);
+// 加载环境变量 - 确保从正确的路径加载
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
 
 async function main() {
-  try {
-    console.log('Migration started...');
-    await migrate(db, { migrationsFolder: 'drizzle' });
-    console.log('Migration completed!');
-  } catch (error) {
-    console.error('Migration failed:', error);
-    throw error;
-  } finally {
-    await pool.end();
-  }
+    console.log("Migration started...");
+    
+    try {
+        // 修改默认连接字符串为无密码版本
+        const connectionString = process.env.DATABASE_URL || 'postgresql://postgres@localhost:5432/postgres';
+        console.log("Using connection string:", connectionString.replace(/:[^:]*@/, ':****@')); // 隐藏密码
+        
+        const pool = new Pool({ connectionString });
+        
+        const db = drizzle(pool);
+        
+        await migrate(db, { migrationsFolder: "./drizzle" });
+        
+        console.log("Migration completed successfully");
+        await pool.end();
+    } catch (error) {
+        console.error("Error during migration:", error);
+        process.exit(1);
+    }
 }
 
-main().catch((err) => {
-  console.error('Error during migration:', err);
-  process.exit(1);
-});
+main();

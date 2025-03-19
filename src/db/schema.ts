@@ -20,6 +20,7 @@ const createTimestamps = {
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
 };
+
 export const users = pgTable("users", {
     userId: bigint("user_id", { mode: "number" }).primaryKey().notNull(),
     email: varchar("email", { length: 255 }).notNull().unique(),
@@ -56,7 +57,7 @@ export const usersRelations = relations(users, ({ many }) => ({
 }));
 
 export const postsRelations = relations(posts, ({ one }) => ({
-    author: one(users, {
+    user: one(users, {
         fields: [posts.userId],
         references: [users.userId],
     }),

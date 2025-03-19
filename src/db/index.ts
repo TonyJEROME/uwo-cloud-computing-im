@@ -1,21 +1,21 @@
 import { drizzle } from "drizzle-orm/node-postgres";
-import * as schema from "./schema"
-import { Pool } from "pg";
+import * as schema from "./schema";
+import { NodePgDatabase } from "drizzle-orm/node-postgres";
+import { pool } from "./pool"; // 导入共享的连接池
 
-// 问题1: 注释掉的import和重复的pg导入是多余的
-// 问题2: DATABASE_URL应该作为connectionString使用，而不是host
-// 问题3: 应该处理连接错误
+// 添加详细日志
+console.log("初始化 Drizzle ORM");
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    // SSL配置可能需要根据环境添加
-    // ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false
-});
+// 创建 Drizzle 实例并添加明确的类型
+let db: NodePgDatabase<typeof schema>;
+try {
+  db = drizzle(pool, { schema });
+  console.log("Drizzle ORM 初始化成功");
+} catch (error) {
+  console.error("Drizzle ORM 初始化失败:", error);
+  throw error;
+}
 
-// 监听连接错误
-pool.on('error', (err) => {
-    console.error('Unexpected error on idle client', err);
-    process.exit(-1);
-});
+console.log("导出数据库连接实例，内存地址:", db);
 
-export const db = drizzle(pool, { schema });
+export { db };

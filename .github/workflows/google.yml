@@ -88,9 +88,11 @@ jobs:
           if [[ "${{ env.DEPLOY_ENV }}" == 'prod' ]]; then
             echo "IMAGE=webapp-prod" >> $GITHUB_ENV
             echo "GKE_CLUSTER=webapp" >> $GITHUB_ENV
+            echo "SECRET_KEY=713996055045/prod_database_password" >> $GITHUB_ENV
           elif [[ "${{ env.DEPLOY_ENV }}" == 'dev' ]]; then
             echo "IMAGE=webapp-dev" >> $GITHUB_ENV
             echo "GKE_CLUSTER=webapp-dev" >> $GITHUB_ENV
+            echo "SECRET_KEY=713996055045/dev_database_password" >> $GITHUB_ENV
           fi
       # Configure Workload Identity Federation and generate an access token.
       #
@@ -118,9 +120,16 @@ jobs:
           cluster_name: '${{ env.GKE_CLUSTER }}'
           location: '${{ env.GKE_ZONE }}'
 
+      - id: 'secrets'
+        uses: 'google-github-actions/get-secretmanager-secrets@v2'
+        with:
+          secrets: |-
+            DB_PASSWORD:${{ env.SECRET_KEY }}
+
       # Build the Docker image
       - name: 'Build and push Docker container'
         run: |-
+          ./env_setup.sh
           DOCKER_TAG="${GAR_LOCATION}-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE}:${GITHUB_SHA}"
 
           docker build \
@@ -130,6 +139,9 @@ jobs:
             .
 
           docker push "${DOCKER_TAG}"
+        env:
+          DB_PASSWORD: ${{ steps.secrets.outputs.DB_PASSWORD }}
+          DB_URL: postgresql://postgres@webapp:5432/postgres
 
       # Set up kustomize
       - name: 'Set up Kustomize'

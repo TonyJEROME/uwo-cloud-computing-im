@@ -40,6 +40,8 @@ RUN adduser -S nextjs -u 1001
 COPY --from=builder --chown=nextjs:nodejs /app/.next /app/.next
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules /app/node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/package.json /app/package.json
+COPY --from=builder --chown=nextjs:nodejs /app/drizzle /app/drizzle
+COPY --from=builder --chown=nextjs:nodejs /app/.env /app/.env
 
 USER nextjs
 

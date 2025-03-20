@@ -141,7 +141,7 @@ jobs:
           docker push "${DOCKER_TAG}"
         env:
           DB_PASSWORD: ${{ steps.secrets.outputs.DB_PASSWORD }}
-          DB_URL: postgresql://postgres@webapp:5432/postgres
+          DB_URL: postgresql://postgres:${{ steps.secrets.outputs.DB_PASSWORD }}@db:5432/postgres
 
       # Set up kustomize
       - name: 'Set up Kustomize'

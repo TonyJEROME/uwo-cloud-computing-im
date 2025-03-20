@@ -1,4 +1,4 @@
-CREATE TABLE "posts" (
+CREATE TABLE IF NOT EXISTS "posts" (
 	"post_id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" bigint NOT NULL,
 	"content" text NOT NULL,

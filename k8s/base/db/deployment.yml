@@ -28,6 +28,5 @@ spec:
             - containerPort: 5432
       volumes:
         - name: init-sql
-          hostPath:
-            path: ./init.sql
-            type: File
+          configMap:
+            name: init-sql

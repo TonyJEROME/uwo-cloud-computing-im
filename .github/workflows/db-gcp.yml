@@ -43,7 +43,6 @@ on:
         type: choice
         options:
           - dev
-          - prod
 
 env:
   PROJECT_ID: 'ece9016-452720'
@@ -112,18 +111,9 @@ jobs:
         run: |-
           echo "DB_PASSWORD=$DB_PASSWORD" > db-config.env
           kustomize edit add configmap db-config --from-env-file=db-config.env
-          ${{ github.workspace }}/kustomize build . | kubectl apply -f -
-          kubectl rollout status deployment/$DEPLOYMENT_NAME
-          kubectl get services -o wide
-        working-directory: ./k8s/base/db
-        env:
-          DB_PASSWORD: ${{ steps.secrets.outputs.DB_PASSWORD }}
-
-      - name: Deploy to Prod Cluster
-        if: ${{ env.DEPLOY_ENV == 'prod' }}
-        run: |-
-          echo "DB_PASSWORD=$DB_PASSWORD" > db-config.env
-          kustomize edit add configmap db-config --from-env-file=db-config.env
+          cat ${{ github.workspace }}/drizzle/0000_noisy_speed_demon.sql >> init.sql
+          cat ${{ github.workspace }}/drizzle/0001_many_the_fallen.sql >> init.sql
+          kustomize edit add configmap init-sql --from-file=init.sql
           ${{ github.workspace }}/kustomize build . | kubectl apply -f -
           kubectl rollout status deployment/$DEPLOYMENT_NAME
           kubectl get services -o wide

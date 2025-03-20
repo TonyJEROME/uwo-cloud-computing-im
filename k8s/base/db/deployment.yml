@@ -21,7 +21,14 @@ spec:
                 configMapKeyRef:
                   name: db-config
                   key: DB_PASSWORD
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
           volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresql-storage
           ports:
             - containerPort: 5432
       volumes:
+        - name: postgresql-storage
+          persistentVolumeClaim:
+            claimName: postgresql-pvc

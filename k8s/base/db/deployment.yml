@@ -22,6 +22,11 @@ spec:
                   name: db-config
                   key: DB_PASSWORD
           volumeMounts:
+            - mountPath: /var/lib/postgresql/data  # 持久化数据目录
+              name: postgresql-storage
           ports:
             - containerPort: 5432
       volumes:
+        - name: postgresql-storage
+          persistentVolumeClaim:
+            claimName: postgresql-pvc

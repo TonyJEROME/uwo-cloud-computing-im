@@ -13,22 +13,21 @@ spec:
         app: db
     spec:
       containers:
-        - name: postgres
-          image: postgres:13
-          env:
-            - name: POSTGRES_PASSWORD
-              valueFrom:
-                configMapKeyRef:
-                  name: db-config
-                  key: DB_PASSWORD
-            - name: PGDATA
-              value: /var/lib/postgresql/data/pgdata
-          volumeMounts:
-            - mountPath: /var/lib/postgresql/data
-              name: postgresql-storage
-          ports:
-            - containerPort: 5432
+      - name: cloud-sql-proxy
+        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:latest
+        args:
+          - "--private-ip"
+          - "--auto-iam-authn"
+          - "--structured-logs"
+          - "--address=0.0.0.0"
+          - "--credentials-file=/secrets/key.json"
+        volumeMounts:
+          - mountPath: /secrets
+            name: cloud-sql-proxy-sa-key
+            readOnly: true
       volumes:
-        - name: postgresql-storage
-          persistentVolumeClaim:
-            claimName: postgresql-pvc
+        - name: cloud-sql-proxy-sa-key
+          secret:
+            secretName: cloud-sql-proxy-sa-key
+      
+        

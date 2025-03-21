@@ -29,5 +29,3 @@ spec:
         - name: cloud-sql-proxy-sa-key
           secret:
             secretName: cloud-sql-proxy-sa-key
-      
-        

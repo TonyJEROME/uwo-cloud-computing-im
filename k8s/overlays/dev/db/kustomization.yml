@@ -1,0 +1,17 @@
+bases:
+  - ../../../base/db
+
+patches:
+  - target:
+      kind: Deployment
+      name: db
+    patch: |-
+      - op: replace
+        path: /spec/template/spec/containers/0/args
+        value:
+          - "--private-ip"
+          - "--auto-iam-authn"
+          - "--structured-logs"
+          - "--address=0.0.0.0"
+          - "--credentials-file=/secrets/key.json"
+          - "ece9016-452720:us-central1:db-dev"

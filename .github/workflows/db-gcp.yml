@@ -43,6 +43,7 @@ on:
         type: choice
         options:
           - dev
+          - prod
 
 env:
   PROJECT_ID: 'ece9016-452720'
@@ -115,6 +116,20 @@ jobs:
           ${{ github.workspace }}/kustomize build . | kubectl apply -f -
           kubectl rollout status deployment/$DEPLOYMENT_NAME
           kubectl get services -o wide
-        working-directory: ./k8s/base/db
+        working-directory: ./k8s/overlays/dev/db
+        env:
+          DB_PASSWORD: ${{ steps.secrets.outputs.DB_PASSWORD }}
+
+      # Deploy the Docker image to the GKE cluster
+      - name: Deploy to Prod Cluster
+        if: ${{ env.DEPLOY_ENV == 'prod' }}
+        run: |-
+          echo "Current Directory: $(pwd)"
+          echo "DB_PASSWORD=$DB_PASSWORD" > db-config.env
+          kustomize edit add configmap db-config --from-env-file=db-config.env
+          ${{ github.workspace }}/kustomize build . | kubectl apply -f -
+          kubectl rollout status deployment/$DEPLOYMENT_NAME
+          kubectl get services -o wide
+        working-directory: ./k8s/overlays/prod/db
         env:
           DB_PASSWORD: ${{ steps.secrets.outputs.DB_PASSWORD }}

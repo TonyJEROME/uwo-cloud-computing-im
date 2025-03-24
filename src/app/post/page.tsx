@@ -23,6 +23,16 @@ type Post = {
   likeCount: number | null;
   user?: User;  // Add user information
   images?: { imageId: string; imageUrl: string }[];
+  comments?: Array<{
+    commentId: string;
+    content: string;
+    createdAt: Date;
+    user: {
+      userId: number;
+      firstName: string;
+      lastName: string;
+    };
+  }>;
 };
 
 export default function PostPage() {
@@ -36,6 +46,8 @@ export default function PostPage() {
     const [uploadingImage, setUploadingImage] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [uploadedImages, setUploadedImages] = useState<Array<{imageId: string, imageUrl: string}>>([]);
+    const [newComments, setNewComments] = useState<Record<string, string>>({});
+    const [submittingComment, setSubmittingComment] = useState<string | null>(null);
 
     // Use API to get posts instead of directly accessing the database
     const fetchPosts = async () => {
@@ -279,6 +291,56 @@ export default function PostPage() {
         }
     };
 
+    const handleCommentChange = (postId: string, value: string) => {
+        setNewComments(prev => ({
+            ...prev,
+            [postId]: value
+        }));
+    };
+
+    const handleCommentSubmit = async (postId: string) => {
+        if (!newComments[postId]?.trim()) return;
+        
+        if (!isLoggedIn) {
+            alert("Please log in to comment");
+            router.push('/login');
+            return;
+        }
+        
+        setSubmittingComment(postId);
+        
+        try {
+            const response = await fetch(`/api/posts/${postId}/comments`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ 
+                    content: newComments[postId]
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Failed to add comment");
+            }
+            
+            // Refresh posts to show the new comment
+            fetchPosts();
+            
+            // Clear comment input
+            setNewComments(prev => ({
+                ...prev,
+                [postId]: ""
+            }));
+        } catch (error) {
+            console.error("Error adding comment:", error);
+            alert(error instanceof Error ? error.message : "Failed to add comment");
+        } finally {
+            setSubmittingComment(null);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
             <div className="max-w-4xl mx-auto px-4">
@@ -408,6 +470,55 @@ export default function PostPage() {
                                     <span>{post.likeCount || 0}</span>
                                 </button>
                             </div>
+                            {post.comments && (
+                                <div className="mt-6 border-t border-gray-100 dark:border-gray-700 pt-4">
+                                    <h3 className="font-medium text-gray-900 dark:text-white mb-3">
+                                        Comments ({post.comments.length})
+                                    </h3>
+                                    
+                                    <div className="space-y-4 mb-4">
+                                        {post.comments.map(comment => (
+                                            <div key={comment.commentId} className="flex space-x-3">
+                                                <div className="flex-shrink-0 w-8 h-8 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                                                    <span className="text-xs text-gray-600 dark:text-gray-300">
+                                                        {comment.user.firstName.charAt(0)}{comment.user.lastName.charAt(0)}
+                                                    </span>
+                                                </div>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center mb-1">
+                                                        <div className="font-medium text-sm text-gray-900 dark:text-white mr-2">
+                                                            {`${comment.user.firstName} ${comment.user.lastName}`}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500">
+                                                            {new Date(comment.createdAt).toLocaleDateString()}
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-sm text-gray-600 dark:text-gray-300">
+                                                        {comment.content}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    
+                                    <div className="flex space-x-2">
+                                        <input
+                                            type="text"
+                                            value={newComments[post.postId] || ""}
+                                            onChange={(e) => handleCommentChange(post.postId, e.target.value)}
+                                            placeholder="Add a comment..."
+                                            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
+                                        />
+                                        <button
+                                            onClick={() => handleCommentSubmit(post.postId)}
+                                            disabled={submittingComment === post.postId || !newComments[post.postId]?.trim()}
+                                            className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm"
+                                        >
+                                            {submittingComment === post.postId ? "Posting..." : "Post"}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

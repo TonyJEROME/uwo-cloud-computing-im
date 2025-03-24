@@ -6,7 +6,11 @@ import { ImageService } from "@/services/image.service";
 
 export async function POST(request: NextRequest) {
     try {
-        const { content, imageIds, isTemporary } = await request.json();
+        const { content, imageIds, isTemporary } = await request.json() as {
+            content: string;
+            imageIds?: string[];
+            isTemporary?: boolean;
+        };
         
         // Get session token
         const cookieStore = await cookies();
@@ -35,7 +39,7 @@ export async function POST(request: NextRequest) {
         
         // If there are image IDs, associate them with the post
         if (imageIds && imageIds.length > 0) {
-            await Promise.all(imageIds.map(imageId => 
+            await Promise.all(imageIds.map((imageId: string) => 
                 ImageService.associateImageWithPost(imageId, newPost.postId)
             ));
         }

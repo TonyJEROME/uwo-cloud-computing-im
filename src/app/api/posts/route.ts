@@ -2,12 +2,13 @@ import { PostService } from "@/services/post.service";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { SessionService } from "@/services/session.service";
+import { ImageService } from "@/services/image.service";
 
 export async function POST(request: NextRequest) {
     try {
-        const { content } = await request.json();
+        const { content, imageIds, isTemporary } = await request.json();
         
-        // 获取会话令牌
+        // Get session token
         const cookieStore = await cookies();
         const sessionToken = cookieStore.get("session")?.value;
         
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
             );
         }
         
-        // 验证会话并获取用户 ID
+        // Validate session and get user ID
         const session = await SessionService.validateSession(sessionToken);
         if (!session) {
             return NextResponse.json(
@@ -27,19 +28,21 @@ export async function POST(request: NextRequest) {
             );
         }
         
-        // 确保 userId 是数字类型
-        const userId = typeof session.user.userId === 'string' 
-            ? parseInt(session.user.userId, 10) 
-            : session.user.userId;
-            
-        console.log("从会话获取的用户ID类型:", typeof userId, "值:", userId);
+        const userId = session.user.userId;
         
-        // 创建帖子
-        const [post] = await PostService.createPost(userId, content);
+        // Create the post
+        const newPost = await PostService.createPost(userId, content, isTemporary);
         
-        return NextResponse.json(post);
+        // If there are image IDs, associate them with the post
+        if (imageIds && imageIds.length > 0) {
+            await Promise.all(imageIds.map(imageId => 
+                ImageService.associateImageWithPost(imageId, newPost.postId)
+            ));
+        }
+        
+        return NextResponse.json(newPost);
     } catch (error: any) {
-        console.error("创建帖子错误:", error);
+        console.error("Error creating post:", error);
         return NextResponse.json(
             { error: error.message || "Failed to create post" },
             { status: 500 }

@@ -11,6 +11,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@google-cloud/storage": "^7.15.2",
     "antd": "^5.24.3",
     "bcrypt": "^5.1.1",
     "drizzle-kit": "^0.30.5",

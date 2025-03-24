@@ -28,6 +28,7 @@ export default function Login() {
                 throw new Error("Login failed");
             }
 
+            await new Promise(resolve => setTimeout(resolve, 1000));
             router.push("/post");
         } catch (err) {
             setError("Login failed, please check your email and password");

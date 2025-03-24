@@ -17,7 +17,7 @@ COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
 #   elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i; \
 #   else echo "Lockfile not found." && exit 1; \
 #   fi
-RUN npm install
+RUN yarn install
 
 # 2. Rebuild the source code only when needed
 FROM base AS builder

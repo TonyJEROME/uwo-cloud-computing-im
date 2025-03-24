@@ -39,6 +39,7 @@ export const posts = pgTable("posts", {
     userId: bigint("user_id", { mode: "number" }).notNull(),
     content: text("content").notNull(),
     likeCount: integer("like_count").default(0),
+    active: boolean("active").default(true).notNull(),
     ...createTimestamps,
 });
 
@@ -50,17 +51,32 @@ export const sessions = pgTable("sessions", {
     ...createTimestamps,
 });
 
+// Add likes table
+export const likes = pgTable("likes", {
+    likeId: uuid("like_id").defaultRandom().primaryKey(),
+    userId: bigint("user_id", { mode: "number" }).notNull(),
+    postId: uuid("post_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => {
+    return {
+        // Ensure a user can only like a post once
+        uniqueLike: unique().on(table.userId, table.postId)
+    };
+});
+
 // 定义表关系
 export const usersRelations = relations(users, ({ many }) => ({
     posts: many(posts),
     sessions: many(sessions),
+    likes: many(likes),
 }));
 
-export const postsRelations = relations(posts, ({ one }) => ({
+export const postsRelations = relations(posts, ({ one, many }) => ({
     user: one(users, {
         fields: [posts.userId],
         references: [users.userId],
     }),
+    likes: many(likes),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -70,7 +86,20 @@ export const sessionsRelations = relations(sessions, ({ one }) => ({
     }),
 }));
 
+// Define likes relations
+export const likesRelations = relations(likes, ({ one }) => ({
+    user: one(users, {
+        fields: [likes.userId],
+        references: [users.userId],
+    }),
+    post: one(posts, {
+        fields: [likes.postId],
+        references: [posts.postId],
+    }),
+}));
+
 // 类型定义
 export type User = InferModel<typeof users>;
 export type Post = InferModel<typeof posts>;
 export type Session = InferModel<typeof sessions>;
+export type Like = InferModel<typeof likes>;

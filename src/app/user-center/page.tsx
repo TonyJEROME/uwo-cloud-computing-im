@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { db } from "@/db";
@@ -16,6 +16,37 @@ export default function UserCenter() {
     });
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [user, setUser] = useState<{
+        userId: number;
+        firstName: string;
+        lastName: string;
+        email: string;
+    } | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch user data on component mount
+    useEffect(() => {
+        const fetchUserData = async () => {
+            try {
+                const response = await fetch('/api/auth/check-session');
+                
+                if (!response.ok) {
+                    // Not logged in, redirect to login
+                    router.push('/login');
+                    return;
+                }
+                
+                const data = await response.json();
+                setUser(data.user);
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        
+        fetchUserData();
+    }, [router]);
 
     const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -66,14 +97,19 @@ export default function UserCenter() {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
             <div className="max-w-4xl mx-auto px-4">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-                    <div className="flex items-center space-x-4 mb-8">
-                        <div className="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                            <span className="text-4xl text-gray-400">👤</span>
-                        </div>
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Profile</h1>
-                            <p className="text-gray-500 dark:text-gray-400">example@email.com</p>
-                        </div>
+                    <div className="mb-8">
+                        {loading ? (
+                            <p className="text-gray-500">Loading profile information...</p>
+                        ) : (
+                            <>
+                                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                                    {user ? `${user.firstName} ${user.lastName}` : "User Profile"}
+                                </h1>
+                                <p className="text-gray-500 dark:text-gray-400">
+                                    {user?.email || "example@email.com"}
+                                </p>
+                            </>
+                        )}
                     </div>
 
                     {error && (
@@ -88,38 +124,12 @@ export default function UserCenter() {
                         </div>
                     )}
 
-                    <div className="space-y-6">
-                        <div className="border-b dark:border-gray-700 pb-6">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Personal Information</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        placeholder="Your name"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                        Phone
-                                    </label>
-                                    <input
-                                        type="tel"
-                                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 text-gray-900 dark:text-white"
-                                        placeholder="Contact phone"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="border-b dark:border-gray-700 pb-6">
+                    <div className="space-y-8">
+                        <div className="pb-6">
                             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Account Security</h2>
                             
                             {!isChangingPassword ? (
-                                <button 
+                                <button
                                     onClick={() => setIsChangingPassword(true)}
                                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                                 >

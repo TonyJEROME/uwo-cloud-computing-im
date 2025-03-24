@@ -39,6 +39,7 @@ export const posts = pgTable("posts", {
     userId: bigint("user_id", { mode: "number" }).notNull(),
     content: text("content").notNull(),
     likeCount: integer("like_count").default(0),
+    active: boolean("active").default(true).notNull(),
     ...createTimestamps,
 });
 

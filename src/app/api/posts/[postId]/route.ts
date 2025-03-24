@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { SessionService } from "@/services/session.service";
+import { PostService } from "@/services/post.service";
 
 interface RequestContext {
   params: {
@@ -75,31 +76,10 @@ export async function DELETE(request: NextRequest) {
         const userId = session.user.userId;
         console.log("Current user ID:", userId);
         
-        // 查找帖子
-        const post = await db.query.posts.findFirst({
-            where: eq(posts.postId, postId),
-        });
+        // 软删除帖子
+        const result = await PostService.deletePost(postId, userId);
         
-        if (!post) {
-            console.log("Post not found");
-            return NextResponse.json({ error: "Post not found" }, { status: 404 });
-        }
-        
-        console.log("Post owner ID:", post.userId);
-        
-        // 检查权限 - 确保只有帖子作者才能删除帖子
-        if (post.userId !== userId) {
-            console.log("Forbidden: User is not the post owner");
-            return NextResponse.json(
-                { error: "You don't have permission to delete this post" },
-                { status: 403 }
-            );
-        }
-        
-        // 删除帖子
-        await db.delete(posts).where(eq(posts.postId, postId));
-        
-        console.log("Post deleted successfully");
+        console.log("Post soft deleted successfully");
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error("Error deleting post:", error);

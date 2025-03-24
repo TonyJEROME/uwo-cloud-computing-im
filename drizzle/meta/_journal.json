@@ -15,6 +15,13 @@
       "when": 1742331179150,
       "tag": "0001_many_the_fallen",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1742822873439,
+      "tag": "0002_rainy_dragon_man",
+      "breakpoints": true
     }
   ]
 }

@@ -33,7 +33,12 @@ export class PostService {
             where: eq(posts.active, true),
             with: {
                 user: true,
-                images: true  // Include images
+                images: true,
+                comments: {
+                    with: {
+                        user: true,
+                    }
+                }
             },
             orderBy: (fields, { desc }) => [desc(fields.createdAt)],
         });

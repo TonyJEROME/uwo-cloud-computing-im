@@ -40,6 +40,7 @@ export const posts = pgTable("posts", {
     content: text("content").notNull(),
     likeCount: integer("like_count").default(0),
     active: boolean("active").default(true).notNull(),
+    isTemporary: boolean("is_temporary").default(false),
     ...createTimestamps,
 });
 
@@ -64,6 +65,14 @@ export const likes = pgTable("likes", {
     };
 });
 
+// Add images table to schema
+export const postImages = pgTable("post_images", {
+    imageId: uuid("image_id").defaultRandom().primaryKey(),
+    postId: uuid("post_id").notNull().references(() => posts.postId),
+    imageUrl: text("image_url").notNull(),
+    ...createTimestamps,
+});
+
 // 定义表关系
 export const usersRelations = relations(users, ({ many }) => ({
     posts: many(posts),
@@ -77,6 +86,7 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
         references: [users.userId],
     }),
     likes: many(likes),
+    images: many(postImages),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -98,8 +108,17 @@ export const likesRelations = relations(likes, ({ one }) => ({
     }),
 }));
 
+// Add image relations
+export const postImagesRelations = relations(postImages, ({ one }) => ({
+    post: one(posts, {
+        fields: [postImages.postId],
+        references: [posts.postId],
+    }),
+}));
+
 // 类型定义
 export type User = InferModel<typeof users>;
 export type Post = InferModel<typeof posts>;
 export type Session = InferModel<typeof sessions>;
 export type Like = InferModel<typeof likes>;
+export type PostImage = InferModel<typeof postImages>;

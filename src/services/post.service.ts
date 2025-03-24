@@ -1,35 +1,44 @@
 import { db } from "@/db";
-import { posts, users } from "@/db/schema";
+import { posts, users, postImages } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { PgTable } from "drizzle-orm/pg-core";
 import { v4 as uuidv4 } from "uuid";
 
 export class PostService {
-    static async createPost(userId: number, content: string) {
+    static async createPost(userId: number, content: string, isTemporary: boolean = false) {
         const userIdNumber = typeof userId === 'string' ? parseInt(userId, 10) : userId;
         
-        console.log("Creating post, user ID type:", typeof userIdNumber, "value:", userIdNumber);
+        console.log(`Creating ${isTemporary ? 'temporary' : 'regular'} post, user ID: ${userIdNumber}`);
 
         const postId = uuidv4();
+        console.log("Generated new post ID:", postId);
         
-        return await db.insert(posts).values({
+        const [newPost] = await db.insert(posts).values({
             postId,
             userId: userIdNumber,
             content,
             active: true,
+            isTemporary: isTemporary === true, // Make sure to store isTemporary flag
             createdAt: new Date(),
             updatedAt: new Date()
         }).returning();
+        
+        console.log("Post created in database, returning:", newPost);
+        
+        return newPost;
     }
 
     static async getAllPosts() {
-        return await db.query.posts.findMany({
+        const allPosts = await db.query.posts.findMany({
             where: eq(posts.active, true),
             with: {
                 user: true,
+                images: true  // Include images
             },
             orderBy: (fields, { desc }) => [desc(fields.createdAt)],
         });
+        
+        return allPosts;
     }
 
     static async deletePost(postId: string, userId: number) {

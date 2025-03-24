@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,6 +22,7 @@ type Post = {
   content: string;
   likeCount: number | null;
   user?: User;  // Add user information
+  images?: { imageId: string; imageUrl: string }[];
 };
 
 export default function PostPage() {
@@ -31,6 +32,10 @@ export default function PostPage() {
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [likeStates, setLikeStates] = useState<Record<string, boolean>>({});
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [uploadedImages, setUploadedImages] = useState<Array<{imageId: string, imageUrl: string}>>([]);
 
     // Use API to get posts instead of directly accessing the database
     const fetchPosts = async () => {
@@ -88,7 +93,95 @@ export default function PostPage() {
         }
     }, [isLoggedIn, allPosts]);
 
-    // Check login status before form submission
+    // Enhance file change handler with better error handling
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const file = e.target.files[0];
+            setSelectedFile(file);
+            
+            // Start upload immediately
+            setUploadingImage(true);
+            
+            try {
+                // Create a temporary post to hold the image
+                console.log("Creating temporary post...");
+                const tempPostResponse = await fetch("/api/posts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ 
+                        content: "Temporary post for image upload", 
+                        isTemporary: true 
+                    }),
+                });
+
+                // Add additional debugging for the response
+                console.log("Temporary post response status:", tempPostResponse.status);
+                const responseText = await tempPostResponse.text();
+                console.log("Raw response:", responseText);
+
+                // Parse the response
+                let tempPost;
+                try {
+                    tempPost = JSON.parse(responseText);
+                    console.log("Parsed temporary post data:", tempPost);
+                } catch (e) {
+                    console.error("Error parsing JSON response:", e);
+                    throw new Error("Failed to parse server response");
+                }
+
+                if (!tempPost || !tempPost.postId) {
+                    console.error("No valid postId received from server:", tempPost);
+                    throw new Error("Failed to get valid post ID for image upload");
+                }
+
+                const tempPostId = tempPost.postId;
+                console.log("Using post ID for image upload:", tempPostId);
+                
+                // Upload image to the temporary post
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                console.log("Uploading image to post:", tempPostId);
+                const uploadResponse = await fetch(`/api/posts/${tempPostId}/image`, {
+                    method: 'POST',
+                    body: formData,
+                });
+                
+                if (!uploadResponse.ok) {
+                    const errorData = await uploadResponse.json();
+                    console.error("Image upload API error:", errorData);
+                    throw new Error(`Failed to upload image: ${errorData.error || "Unknown error"}`);
+                }
+                
+                const uploadedImage = await uploadResponse.json();
+                console.log("Image uploaded successfully:", uploadedImage);
+                
+                // Store the uploaded image info
+                setUploadedImages(prev => [...prev, {
+                    imageId: uploadedImage.imageId,
+                    imageUrl: uploadedImage.imageUrl
+                }]);
+                
+                // Show success notification
+                alert("Image uploaded successfully! It will be attached when you submit your post.");
+                
+                // Reset file input
+                setSelectedFile(null);
+                if (fileInputRef.current) {
+                    fileInputRef.current.value = '';
+                }
+            } catch (error) {
+                console.error('Error during image upload process:', error);
+                alert(`Failed to upload image: ${error instanceof Error ? error.message : "Unknown error"}`);
+            } finally {
+                setUploadingImage(false);
+            }
+        }
+    };
+
+    // Modify handleSubmit to use already uploaded images
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
@@ -104,22 +197,27 @@ export default function PostPage() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ content: newPost }),
+                body: JSON.stringify({ 
+                    content: newPost,
+                    imageIds: uploadedImages.map(img => img.imageId) // Pass the uploaded image IDs
+                }),
             });
 
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || "Failed to create post");
             }
-
+            
+            // Reset form
             setNewPost("");
+            setUploadedImages([]);
             fetchPosts(); // Refresh posts
         } catch (error) {
             console.error("Error creating post:", error);
             alert(error instanceof Error ? error.message : "Failed to publish post");
         }
     };
-    
+
     // Add post deletion function
     const handleDeletePost = async (postId: string) => {
         if (confirm("Are you sure you want to delete this post?")) {
@@ -204,13 +302,57 @@ export default function PostPage() {
                         placeholder="Share your thoughts..."
                         rows={4}
                     />
-                    <button
-                        type="submit"
-                        className="mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        Post
-                    </button>
+                    
+                    <div className="flex items-center mt-2 space-x-4">
+                        <div className="flex-1">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                ref={fileInputRef}
+                                className="text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-200 file:text-gray-700 dark:file:bg-gray-700 dark:file:text-white hover:file:bg-gray-300 dark:hover:file:bg-gray-600"
+                            />
+                            {selectedFile && (
+                                <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">
+                                    {selectedFile.name}
+                                </span>
+                            )}
+                        </div>
+                        
+                        <button
+                            type="submit"
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                            disabled={uploadingImage}
+                        >
+                            {uploadingImage ? "Uploading..." : "Post"}
+                        </button>
+                    </div>
                 </form>
+
+                {uploadedImages.length > 0 && (
+                    <div className="mt-4 mb-4">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">Uploaded images (will be attached to your post):</p>
+                        <div className="flex flex-wrap gap-2">
+                            {uploadedImages.map(image => (
+                                <div key={image.imageId} className="relative">
+                                    <img 
+                                        src={image.imageUrl} 
+                                        alt="Uploaded image" 
+                                        className="w-24 h-24 object-cover rounded-lg"
+                                    />
+                                    <button
+                                        onClick={() => {
+                                            setUploadedImages(prev => prev.filter(img => img.imageId !== image.imageId));
+                                        }}
+                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                                    >
+                                        ×
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="space-y-6">
                     {allPosts.map((post) => (
@@ -240,6 +382,19 @@ export default function PostPage() {
                             <div className="text-gray-900 dark:text-white">
                                 {post.content}
                             </div>
+                            {post.images && post.images.length > 0 && (
+                                <div className="mt-4 mb-4">
+                                    {post.images.map(image => (
+                                        <div key={image.imageId} className="mt-2 rounded-lg overflow-hidden">
+                                            <img 
+                                                src={image.imageUrl} 
+                                                alt="Post image" 
+                                                className="max-w-full h-auto rounded-lg"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                             <div className="mt-4 flex items-center space-x-4">
                                 <button 
                                     onClick={() => handleLikeToggle(post.postId)}

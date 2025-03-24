@@ -93,6 +93,24 @@ export default function UserCenter() {
         }
     };
 
+    const handleLogout = async () => {
+        try {
+            const response = await fetch("/api/auth/logout", {
+                method: "POST",
+            });
+            
+            if (!response.ok) {
+                throw new Error("Failed to logout");
+            }
+            
+            // Redirect to login page after successful logout
+            router.push("/login");
+        } catch (error) {
+            console.error("Logout error:", error);
+            setError("Failed to logout. Please try again.");
+        }
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
             <div className="max-w-4xl mx-auto px-4">
@@ -126,7 +144,16 @@ export default function UserCenter() {
 
                     <div className="space-y-8">
                         <div className="pb-6">
-                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Account Security</h2>
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Account Security</h2>
+                                
+                                <button
+                                    onClick={handleLogout}
+                                    className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                                >
+                                    Logout
+                                </button>
+                            </div>
                             
                             {!isChangingPassword ? (
                                 <button
@@ -194,7 +221,7 @@ export default function UserCenter() {
                                 </form>
                             )}
                         </div>
-
+                        
                         <div>
                             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">My Posts</h2>
                             <a

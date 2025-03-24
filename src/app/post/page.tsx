@@ -30,6 +30,7 @@ export default function PostPage() {
     const [allPosts, setAllPosts] = useState<Post[]>([]);
     const [isDeleting, setIsDeleting] = useState<string | null>(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [likeStates, setLikeStates] = useState<Record<string, boolean>>({});
 
     // Use API to get posts instead of directly accessing the database
     const fetchPosts = async () => {
@@ -59,6 +60,33 @@ export default function PostPage() {
         checkLoginStatus();
         fetchPosts();
     }, []);
+
+    // Fetch like status for all posts
+    const fetchLikeStatus = async (postId: string) => {
+        if (!isLoggedIn) return;
+        
+        try {
+            const response = await fetch(`/api/posts/${postId}/like`);
+            if (response.ok) {
+                const data = await response.json();
+                setLikeStates(prev => ({
+                    ...prev,
+                    [postId]: data.liked
+                }));
+            }
+        } catch (error) {
+            console.error("Error fetching like status:", error);
+        }
+    };
+
+    // Fetch all like statuses when posts load or login status changes
+    useEffect(() => {
+        if (isLoggedIn && allPosts.length > 0) {
+            allPosts.forEach(post => {
+                fetchLikeStatus(post.postId);
+            });
+        }
+    }, [isLoggedIn, allPosts]);
 
     // Check login status before form submission
     const handleSubmit = async (e: React.FormEvent) => {
@@ -113,6 +141,43 @@ export default function PostPage() {
             } finally {
                 setIsDeleting(null);
             }
+        }
+    };
+
+    // Handle like button click
+    const handleLikeToggle = async (postId: string) => {
+        if (!isLoggedIn) {
+            alert("Please log in to like posts");
+            router.push('/login');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/posts/${postId}/like`, {
+                method: "POST",
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                // Update like state
+                setLikeStates(prev => ({
+                    ...prev,
+                    [postId]: data.liked
+                }));
+                
+                // Update post like count in the UI
+                setAllPosts(prev => prev.map(post => {
+                    if (post.postId === postId) {
+                        return {
+                            ...post,
+                            likeCount: (post.likeCount || 0) + (data.liked ? 1 : -1)
+                        };
+                    }
+                    return post;
+                }));
+            }
+        } catch (error) {
+            console.error("Error toggling like:", error);
         }
     };
 
@@ -182,9 +247,16 @@ export default function PostPage() {
                                 {post.content}
                             </div>
                             <div className="mt-4 flex items-center space-x-4">
-                                <button className="flex items-center space-x-2 text-gray-500 hover:text-blue-600">
-                                    <span>👍</span>
-                                    <span>{post.likeCount}</span>
+                                <button 
+                                    onClick={() => handleLikeToggle(post.postId)}
+                                    className={`flex items-center space-x-2 ${
+                                        likeStates[post.postId] 
+                                            ? "text-blue-600" 
+                                            : "text-gray-500 hover:text-blue-600"
+                                    }`}
+                                >
+                                    <span>{likeStates[post.postId] ? "❤️" : "👍"}</span>
+                                    <span>{post.likeCount || 0}</span>
                                 </button>
                             </div>
                         </div>

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { SessionService } from "@/services/session.service";
 import { ImageService } from "@/services/image.service";
+import NextCors from 'nextjs-cors';
 
 export async function POST(request: NextRequest) {
     try {

@@ -1,19 +1,20 @@
 import { CommentService } from "@/services/comment.service";
 import { SessionService } from "@/services/session.service";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { comments } from "@/db/schema";
 
 // POST - Create a new comment
-export async function POST(
-    request: NextRequest,
-    { params }: { params: { postId: string } }
-) {
+export async function POST(request: Request) {
     try {
+        // Extract postId from URL path
+        const url = new URL(request.url);
+        const pathParts = url.pathname.split('/');
+        const postId = pathParts[pathParts.length - 2]; // path ends with '/comments'
+        
         const { content } = await request.json() as { content: string };
-        const postId = params.postId;
         
         // Validate postId
         if (!postId) {
@@ -67,12 +68,12 @@ export async function POST(
 }
 
 // GET - Fetch comments for a post
-export async function GET(
-    request: NextRequest,
-    { params }: { params: { postId: string } }
-) {
+export async function GET(request: Request) {
     try {
-        const postId = params.postId;
+        // Extract postId from URL path
+        const url = new URL(request.url);
+        const pathParts = url.pathname.split('/');
+        const postId = pathParts[pathParts.length - 2]; // path ends with '/comments'
         
         // Validate postId
         if (!postId) {

@@ -10,5 +10,7 @@ spec:
       port: 80
       targetPort: 3000
   type: LoadBalancer
-  sessionAffinity:
-    affinityType: CLIENT_IP_COOKIE
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800

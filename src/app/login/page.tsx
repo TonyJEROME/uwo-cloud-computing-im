@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function Login() {
+    let a = 1; 
     const router = useRouter();
     const [formData, setFormData] = useState({
         email: "",
